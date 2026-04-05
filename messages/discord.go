@@ -21,4 +21,10 @@ type CommandCreate struct {
     Command *discordgo.ApplicationCommand
 }
 
+type FollowUp struct {
+	Interaction *discordgo.Interaction
+	Content     string
+	Flags       discordgo.MessageFlags
+}
+
 type Register struct{}

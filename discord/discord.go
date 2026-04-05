@@ -1,6 +1,7 @@
 package discord
 
 import (
+    "ProtoDiscord/core"
     "ProtoDiscord/messages"
     "log/slog"
 
@@ -37,6 +38,17 @@ func (dc *Connect) Receive(ctx actor.Context) {
             ctx.Logger().Error("Discord connection failed", slog.String("error", err.Error()))
             return
         }
+
+    case *messages.FollowUp:
+        if _, err = dc.discord.FollowupMessageCreate(msg.Interaction, true, &discordgo.WebhookParams{
+            Content: msg.Content,
+            Flags:   msg.Flags,
+        }); err != nil {
+            ctx.Logger().Error("Failed to send follow-up message", slog.String("error", err.Error()))
+        }
+
+    case *messages.RegisterInteractionHandler:
+        core.RegisterInteraction(msg.CustomID, msg.Handler)
 
     case *messages.Respond:
         if err = dc.discord.InteractionRespond(msg.Interaction, msg.Response); err != nil {

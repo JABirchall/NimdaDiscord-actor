@@ -17,19 +17,30 @@ func onReady(_ *discordgo.Session, r *discordgo.Ready) {
 }
 
 func onCommand(_ *discordgo.Session, i *discordgo.InteractionCreate) {
-    if i.Type != discordgo.InteractionApplicationCommand {
-        return
-    }
+    switch i.Type {
+    case discordgo.InteractionApplicationCommand:
+        data := i.ApplicationCommandData()
+        core.System.Logger().Info("Received command", slog.String("command", data.Name))
 
-    data := i.ApplicationCommandData()
-    core.System.Logger().Info("Received command", slog.String("command", data.Name))
+        for cmd := range commands.Map {
+            if data.Name == commands.Map[cmd].Name {
+                actorName := "command-" + data.Name
+                pid := core.SpawnCommand(cmd, actorName)
+                core.System.Root.Send(pid, &messages.ExecuteCommand{Interaction: i.Interaction, CommandData: &data})
+                return
+            }
+        }
 
-    for cmd := range commands.Map {
-        if data.Name == commands.Map[cmd].Name {
-            actorName := "command-" + data.Name
-            pid := core.SpawnCommand(cmd, actorName)
-            core.System.Root.Send(pid, &messages.ExecuteCommand{Interaction: i.Interaction, CommandData: &data})
-            return
+    case discordgo.InteractionMessageComponent:
+        customID := i.MessageComponentData().CustomID
+        if pid, ok := core.ConsumeInteraction(customID); ok {
+            core.System.Root.Send(pid, &messages.InteractionEvent{Interaction: i.Interaction})
+        }
+
+    case discordgo.InteractionModalSubmit:
+        customID := i.ModalSubmitData().CustomID
+        if pid, ok := core.ConsumeInteraction(customID); ok {
+            core.System.Root.Send(pid, &messages.InteractionEvent{Interaction: i.Interaction})
         }
     }
 }
