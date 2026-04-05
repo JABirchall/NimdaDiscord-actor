@@ -72,7 +72,7 @@ func (f *Form) Receive(ctx actor.Context) {
         ctx.SetReceiveTimeout(1 * time.Minute)
 
     case *actor.ReceiveTimeout:
-        ctx.Logger().Info("Form timed out, stopping actor", slog.String("actor", ctx.Self().Id))
+        ctx.Logger().Info("Form received no response, stopping actor", slog.String("actor", ctx.Self().Id))
         ctx.Send(core.DiscordPID, &messages.FollowUp{
             Interaction: f.interaction,
             Content:     "The form has expired. Please run `/form` again if you'd like to submit.",
@@ -82,6 +82,7 @@ func (f *Form) Receive(ctx actor.Context) {
         ctx.Stop(ctx.Self())
 
     case *messages.InteractionEvent:
+        ctx.Logger().Info("Form response received", slog.String("actor", ctx.Self().Id))
         data := msg.Interaction.ModalSubmitData()
 
         name := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value

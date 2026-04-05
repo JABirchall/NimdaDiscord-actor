@@ -10,7 +10,6 @@ import (
 )
 
 func onReady(_ *discordgo.Session, r *discordgo.Ready) {
-    core.System.Logger().Info("Discord connection established")
     core.System.Logger().Info("Logged in", slog.String("as", r.User.String()))
     core.Spawn(&ApplicationCommands{}, core.ApplicationCommandsPID.Id)
     core.System.Root.Send(core.ApplicationCommandsPID, &messages.Register{})

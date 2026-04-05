@@ -11,7 +11,9 @@ import (
 
 type Echo struct{}
 
-func (e Echo) Receive(ctx actor.Context) {
+func (e *Echo) NewActor() actor.Actor { return &Echo{} }
+
+func (e *Echo) Receive(ctx actor.Context) {
     switch msg := ctx.Message().(type) {
     case *actor.Started:
         ctx.Logger().Info("Started, actor started", slog.String("actor", ctx.Self().Id))

@@ -31,7 +31,7 @@ func (dc *Connect) Receive(ctx actor.Context) {
             return
         }
 
-        dc.discord.AddHandler(onReady)
+        dc.discord.AddHandlerOnce(onReady)
         dc.discord.AddHandler(onCommand)
 
         if err = dc.discord.Open(); err != nil {

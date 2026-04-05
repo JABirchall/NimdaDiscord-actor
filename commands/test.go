@@ -11,7 +11,9 @@ import (
 
 type Test struct{}
 
-func (e Test) Receive(ctx actor.Context) {
+func (t *Test) NewActor() actor.Actor { return &Test{} }
+
+func (e *Test) Receive(ctx actor.Context) {
     switch msg := ctx.Message().(type) {
     case *actor.Started:
         ctx.Logger().Info("Started, actor started", slog.String("actor", ctx.Self().Id))
